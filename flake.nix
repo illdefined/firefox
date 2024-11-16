@@ -2,7 +2,7 @@
   description = "Custom Firefox build";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    eosyn.url = "git+https://woof.rip/mikael/eosyn.git";
   };
 
   nixConfig = {
@@ -11,43 +11,55 @@
     extra-trusted-public-keys = [ "cache.kyouma.net:Frjwu4q1rnwE/MnSTmX9yx86GNA/z3p/oElGvucLiZg=" ];
   };
 
-  outputs = { self, nixpkgs, ... }: let
-    inherit (nixpkgs) lib;
+  outputs = { self, eosyn, ... }: let
+    inherit (eosyn) lib;
   in {
-    packages = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system: let
-      pkgs = nixpkgs.legacyPackages.${system}.pkgsMusl;
-      mimalloc = pkgs.mimalloc.override { secureBuild = true; };
+    packages = lib.mapAttrs (system: pkgs: let
       extraWrapper = prevAttrs: {
         buildCommand = prevAttrs.buildCommand + ''
           sed -i \
             -e '$i export MIMALLOC_PURGE_DELAY=150' \
-            -e '$i export MIMALLOC_PURGE_DECOMMITS=0' \
             -e '$i export MIMALLOC_RESERVE_HUGE_OS_PAGES=2' \
             "$out/bin/${prevAttrs.meta.mainProgram}"
         '';
       };
+
+      wrapFirefox = pkgs.wrapFirefox.override {
+        ffmpeg = pkgs.ffmpeg.override {
+          ffmpegVariant = "headless";
+
+          withAlsa = false;
+          withAom = false;
+          withCodec2 = true;
+          withDrm = false;
+          withGnutls = false;
+          withSsh = false;
+          withV4l2 = false;
+
+          withNetwork = false;
+          withBin = false;
+          withLib = true;
+          withDocumentation = false;
+          withStripping = true;
+        };
+      };
+
     in {
       default = self.packages.${system}.firefox;
       firefox = (pkgs.wrapFirefox self.packages.${system}.firefox-unwrapped {
-        extraPoliciesFiles = [ ./policy.nix ];
+        extraPoliciesFiles =
+          import ./policy.nix { inherit lib; firefox = true; }
+          |> pkgs.writers.writeJSON "policy.json"
+          |> lib.singleton;
       }).overrideAttrs extraWrapper;
 
-      firefox-unwrapped = ((pkgs.buildMozillaMach {
+      firefox-unwrapped = (pkgs.buildMozillaMach {
         pname = "firefox";
-
         inherit (pkgs.firefox-beta-unwrapped)
           src version meta tests;
 
-        extraConfigureFlags = [
-          "--enable-default-toolkit=cairo-gtk3-wayland-only"
-        ];
-
-        extraBuildInputs = [ mimalloc ];
-      }).overrideAttrs (prevAttrs: {
-        env = prevAttrs.env or { } // {
-          LDFLAGS = lib.toList prevAttrs.env.LDFLAGS or [ ] ++ [ "-lmimalloc" ] |> toString;
-        };
-      })).override {
+        extraConfigureFlags = [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];      
+      }).override {
         alsaSupport = false;
         ffmpegSupport = true;
         gssSupport = false;
@@ -62,14 +74,20 @@
 
         crashreporterSupport = false;
         googleAPISupport = false;
+
+        stdenv = pkgs.hardenedStdenv;
       };
 
-      thunderbird = (pkgs.wrapThunderbird self.packages.${system}.thunderbird-unwrapped { }).overrideAttrs extraWrapper;
+      thunderbird = (pkgs.wrapThunderbird self.packages.${system}.thunderbird-unwrapped {
+        extraPoliciesFiles =
+          import ./policy.nix { inherit lib; thunderbird = true; }
+          |> pkgs.writers.writeJSON "policy.json"
+          |> lib.singleton;
+      }).overrideAttrs extraWrapper;
 
       thunderbird-unwrapped = (pkgs.thunderbird-latest-unwrapped.overrideAttrs (prevAttrs: {
-        configureFlags = prevAttrs.configureFlags or [ ] ++ [
-          "--enable-default-toolkit=cairo-gtk3-wayland-only"
-        ];
+        configureFlags = prevAttrs.configureFlags or [ ]
+          ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
       })).override {
         alsaSupport = false;
         ffmpegSupport = false;
@@ -85,10 +103,12 @@
 
         privacySupport = true;
         drmSupport = false;
+
+        stdenv = pkgs.hardenedStdenv;
       };
-    });
+    }) eosyn.legacyPackages;
 
     hydraJobs = self.packages |> lib.foldlAttrs (jobs: system: packages: lib.recursiveUpdate jobs
-      (lib.mapAttrs (name: package: { ${system} = package; }) packages)) { };
+      (lib.mapAttrs (name: package: { ${system} = lib.hydraJob package; }) packages)) { };
   };
 }

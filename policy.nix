@@ -1,4 +1,6 @@
-{
+{ lib, firefox ? false, thunderbird ? false }: let
+  inherit (lib) optionals optionalAttrs;
+in assert (lib.xor firefox thunderbird); {
   CaptivePortal = false;
 
   Cookies = {
@@ -23,29 +25,27 @@
   
   EncryptedMediaExtensions.Enabled = true;
 
-  ExtensionSettings = [
-    {
-      "@testpilot-containers" = {
-        installation_mode = "normal_installed";
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/multi-account-containers/latest.xpi";
-      };
-    
-      "uBlock0@raymondhill.net" = {
-        installation_mode = "normal_installed";
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-      };
+  ExtensionSettings = {
+    "uBlock0@raymondhill.net" = {
+      installation_mode = "normal_installed";
+      install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
+    };
+  } // optionalAttrs firefox {
+    "@testpilot-containers" = {
+      installation_mode = "normal_installed";
+      install_url = "https://addons.mozilla.org/firefox/downloads/latest/multi-account-containers/latest.xpi";
+    };
 
-      "gdpr@cavi.au.dk" = {
-        installation_mode = "normal_installed";
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/consent-o-matic/latest.xpi";
-      }
+    "gdpr@cavi.au.dk" = {
+      installation_mode = "normal_installed";
+      install_url = "https://addons.mozilla.org/firefox/downloads/latest/consent-o-matic/latest.xpi";
+    };
 
-      "jid1-BoFifL9Vbdl2zQ@jetpack" = {
-        installation_mode = "normal_installed";
-        install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
-      };
-    }
-  ];
+    "jid1-BoFifL9Vbdl2zQ@jetpack" = {
+      installation_mode = "normal_installed";
+      install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
+    };
+  };
 
   FirefoxHome = {
     SponsoredTopSites = false;
@@ -61,7 +61,6 @@
   HomePage.StartPage = "previous-session";
   HttpsOnlyMode = "force_enabled";
   NewTabPage = false;
-  OverrideFirstRunPage = "";
   OverrideFirstRunPage = "";
 
   PDFjs = {
@@ -84,15 +83,15 @@
       Value = value;
     };
   in {
+    # date and time formats
+    "intl.date_time.pattern_override.date_short" = default "yyyy-MM-dd";
+    "intl.date_time.pattern_override.time_short" = default "HH:mm";
+  
     # cache
     "browser.cache.memory.enable" = default true;
     "browser.cache.memory.capacity" = default 262144;
     "browser.cache.disk.enable" = default true;
     "browser.cache.disk.capacity" = default 16777216;
-
-    # hardware acceleration
-    "gfx.webrender.all" = default true;
-    "media.ffmpeg.vaapi.enabled" = default true;
 
     # disable WebGL by default
     "webgl.disabled" = default true;
@@ -136,6 +135,10 @@
 
     # enable ECN
     "network.http.http3.ecn" = default true;
+  } // optionalAttrs firefox {
+    # hardware acceleration
+    "gfx.webrender.all" = default true;
+    "media.ffmpeg.vaapi.enabled" = default true;
   };
   
   PromptForDownloadLocation = true;
