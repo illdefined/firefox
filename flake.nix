@@ -17,19 +17,20 @@
     packages = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (system: let
       pkgs = nixpkgs.legacyPackages.${system}.pkgsMusl;
       mimalloc = pkgs.mimalloc.override { secureBuild = true; };
-    in {
-      default = self.packages.${system}.firefox;
-      firefox = (pkgs.wrapFirefox self.packages.${system}.firefox-unwrapped {
-        extraPoliciesFiles = [ ./policy.nix ];
-      }).overrideAttrs (prevAttrs: {
+      extraWrapper = prevAttrs: {
         buildCommand = prevAttrs.buildCommand + ''
           sed -i \
             -e '$i export MIMALLOC_PURGE_DELAY=150' \
             -e '$i export MIMALLOC_PURGE_DECOMMITS=0' \
             -e '$i export MIMALLOC_RESERVE_HUGE_OS_PAGES=2' \
-            "$out/bin/firefox"
+            "$out/bin/${prevAttrs.meta.mainProgram}"
         '';
-      });
+      };
+    in {
+      default = self.packages.${system}.firefox;
+      firefox = (pkgs.wrapFirefox self.packages.${system}.firefox-unwrapped {
+        extraPoliciesFiles = [ ./policy.nix ];
+      }).overrideAttrs extraWrapper;
 
       firefox-unwrapped = ((pkgs.buildMozillaMach {
         pname = "firefox";
@@ -61,6 +62,29 @@
 
         crashreporterSupport = false;
         googleAPISupport = false;
+      };
+
+      thunderbird = (pkgs.wrapThunderbird self.packages.${system}.thunderbird-unwrapped { }).overrideAttrs extraWrapper;
+
+      thunderbird-unwrapped = (pkgs.thunderbird-latest-unwrapped.overrideAttrs (prevAttrs: {
+        configureFlags = prevAttrs.configureFlags or [ ] ++ [
+          "--enable-default-toolkit=cairo-gtk3-wayland-only"
+        ];
+      })).override {
+        alsaSupport = false;
+        ffmpegSupport = false;
+        gssSupport = false;
+        jackSupport = false;
+        jemallocSupport = false;
+        ltoSupport = true;
+        pgoSupport = true;
+        pipewireSupport = false;
+        pulseaudioSupport = false;
+        sndioSupport = false;
+        waylandSupport = true;
+
+        privacySupport = true;
+        drmSupport = false;
       };
     });
 
