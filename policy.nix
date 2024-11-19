@@ -94,6 +94,9 @@
     "gfx.webrender.all" = default true;
     "media.ffmpeg.vaapi.enabled" = default true;
 
+    # disable WebGL by default
+    "webgl.disabled" = default true;
+
     # disable Normandy
     "app.normandy.enabled" = locked false;
     "app.normandy.api_url" = locked "";
