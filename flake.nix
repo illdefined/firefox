@@ -116,7 +116,7 @@
         jackSupport = false;
         jemallocSupport = false;
         ltoSupport = true;
-        pgoSupport = true;
+        pgoSupport = false;
         pipewireSupport = false;
         pulseaudioSupport = true;
         sndioSupport = false;
