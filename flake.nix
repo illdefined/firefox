@@ -13,6 +13,11 @@
 
   outputs = { self, nixpkgs, ... }: let
     inherit (nixpkgs) lib;
+
+    meta = {
+      timeout = 24 * 3600;
+      maxSilent = 6 * 3600;
+    };
   in {
     packages = lib.genAttrs [ "riscv64-linux" "aarch64-linux" "x86_64-linux" ] (system: let
       pkgs = nixpkgs.legacyPackages.${system};
@@ -71,9 +76,7 @@
         configureFlags = prevAttrs.configureFlags or [ ]
           ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
-        meta = prevAttrs.meta // {
-          timeout = 48 * 3600;
-        };
+        meta = prevAttrs.meta // meta;
       })).override {
         #alsaSupport = false;
         ffmpegSupport = true;
@@ -104,9 +107,7 @@
 
         extraConfigureFlags = [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
-        meta = pkgs.firefox-beta-unwrapped.meta // {
-          timeout = 48 * 3600;
-        };
+        meta = pkgs.firefox-beta-unwrapped.meta // meta;
       }).override {
         #alsaSupport = false;
         ffmpegSupport = true;
@@ -137,16 +138,14 @@
         configureFlags = prevAttrs.configureFlags or [ ]
           ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
-        meta = prevAttrs.meta // {
-          timeout = 48 * 3600;
-        };
+        meta = prevAttrs.meta // meta;
       })).override {
         #alsaSupport = false;
         ffmpegSupport = false;
         jackSupport = false;
         jemallocSupport = false;
         ltoSupport = true;
-        pgoSupport = false;
+        pgoSupport = true;
         pipewireSupport = false;
         pulseaudioSupport = true;
         sndioSupport = false;
