@@ -59,7 +59,37 @@
       };
 
     in {
-      default = self.packages.${system}.firefox;
+      default = self.packages.${system}.floorp;
+      floorp = (pkgs.wrapFirefox self.packages.${system}.floorp-unwrapped {
+        extraPoliciesFiles =
+          import ./policy.nix { inherit lib; firefox = true; }
+          |> pkgs.writers.writeJSON "policy.json"
+          |> lib.singleton;
+      }).overrideAttrs extraWrapper;
+
+      floorp-unwrapped = (pkgs.floorp-unwrapped.overrideAttrs (prevAttrs: {
+        configureFlags = prevAttrs.configureFlags or [ ]
+          ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
+
+        meta = prevAttrs.meta // {
+          timeout = 48 * 3600;
+        };
+      })).override {
+        #alsaSupport = false;
+        ffmpegSupport = true;
+        gssSupport = false;
+        jackSupport = false;
+        jemallocSupport = false;
+        ltoSupport = true;
+        pgoSupport = true;
+        pipewireSupport = true;
+        pulseaudioSupport = true;
+        sndioSupport = false;
+        waylandSupport = true;
+
+        inherit (self.packages.${system}) xvfb-run;
+      };
+
       firefox = (pkgs.wrapFirefox self.packages.${system}.firefox-unwrapped {
         extraPoliciesFiles =
           import ./policy.nix { inherit lib; firefox = true; }
