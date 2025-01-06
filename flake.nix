@@ -16,7 +16,7 @@
 
     meta = {
       timeout = 24 * 3600;
-      maxSilent = 6 * 3600;
+      maxSilent = 8 * 3600;
     };
   in {
     packages = lib.genAttrs [ "riscv64-linux" "aarch64-linux" "x86_64-linux" ] (system: let
