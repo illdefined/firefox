@@ -29,7 +29,7 @@
             MI_DEFAULT_ALLOW_LARGE_OS_PAGES = 1;
           } |> lib.mapAttrsToList (name: value: "${name}=${toString value}")
             |> lib.concatStringsSep ";";
-        in prevAttrs.cmakeFlags ++ [ ''-DMI_EXTRA_CPPDEFS="${cppdefs}"'' ];
+        in prevAttrs.cmakeFlags ++ [ "-DMI_EXTRA_CPPDEFS=${cppdefs}" ];
       })).override {
         secureBuild = true;
       };
