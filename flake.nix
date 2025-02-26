@@ -23,13 +23,12 @@
       pkgs = nixpkgs.legacyPackages.${system};
 
       mimalloc = (pkgs.mimalloc.overrideAttrs (prevAttrs: {
-        cmakeFlags = let
-          cppdefs = {
-            MI_DEFAULT_EAGER_COMMIT = 0;
-            MI_DEFAULT_ALLOW_LARGE_OS_PAGES = 1;
-          } |> lib.mapAttrsToList (name: value: "${name}=${toString value}")
-            |> lib.concatStringsSep ";";
-        in prevAttrs.cmakeFlags ++ [ "-DMI_EXTRA_CPPDEFS=${cppdefs}" ];
+        postPatch = prevAttrs.postPatch or "" + ''
+        sed -E -i \
+          -e 's/(\{ )1(, UNINIT, MI_OPTION_LEGACY\(purge_decommits,reset_decommits\) \})/\10\2/' \
+          -e 's/(\{ )10(,  UNINIT, MI_OPTION_LEGACY\(purge_delay,reset_delay\) \})/\150\2/' \
+          src/options.c
+        '';
       })).override {
         secureBuild = true;
       };
@@ -37,8 +36,6 @@
       extraWrapper = prevAttrs: {
         buildCommand = prevAttrs.buildCommand + ''
           sed -i \
-            -e '$i export MIMALLOC_PURGE_DELAY=150' \
-            -e '$i export MIMALLOC_RESERVE_HUGE_OS_PAGES=2' \
             -e '$i export LD_PRELOAD="${lib.getLib mimalloc}/lib/libmimalloc-secure.so"' \
             "$out/bin/${prevAttrs.meta.mainProgram}"
         '';
