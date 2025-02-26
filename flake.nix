@@ -40,26 +40,6 @@
             "$out/bin/${prevAttrs.meta.mainProgram}"
         '';
       };
-
-      wrapFirefox = pkgs.wrapFirefox.override {
-        ffmpeg = pkgs.ffmpeg.override {
-          ffmpegVariant = "headless";
-
-          withAlsa = false;
-          withAom = false;
-          withCodec2 = true;
-          withGnutls = false;
-          withSsh = false;
-          withV4l2 = false;
-
-          withNetwork = false;
-          withBin = false;
-          withLib = true;
-          withDocumentation = false;
-          withStripping = true;
-        };
-      };
-
     in {
       default = self.packages.${system}.floorp;
       floorp = (pkgs.wrapFirefox self.packages.${system}.floorp-unwrapped {
@@ -86,40 +66,6 @@
         pulseaudioSupport = true;
         sndioSupport = false;
         waylandSupport = true;
-
-        inherit (self.packages.${system}) xvfb-run;
-      };
-
-      firefox = (pkgs.wrapFirefox self.packages.${system}.firefox-unwrapped {
-        extraPoliciesFiles =
-          import ./policy.nix { inherit lib; firefox = true; }
-          |> pkgs.writers.writeJSON "policy.json"
-          |> lib.singleton;
-      }).overrideAttrs extraWrapper;
-
-      firefox-unwrapped = (pkgs.buildMozillaMach {
-        pname = "firefox";
-        inherit (pkgs.firefox-beta-unwrapped)
-          src version tests;
-
-        extraConfigureFlags = [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
-
-        meta = pkgs.firefox-beta-unwrapped.meta // meta;
-      }).override {
-        #alsaSupport = false;
-        ffmpegSupport = true;
-        gssSupport = false;
-        jackSupport = false;
-        jemallocSupport = false;
-        ltoSupport = true;
-        pgoSupport = true;
-        pipewireSupport = true;
-        pulseaudioSupport = true;
-        sndioSupport = false;
-        waylandSupport = true;
-
-        crashreporterSupport = false;
-        googleAPISupport = false;
 
         inherit (self.packages.${system}) xvfb-run;
       };
