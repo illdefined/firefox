@@ -6,7 +6,7 @@
   };
 
   nixConfig = {
-    extra-experimental-features = [ "pipe-operator" "pipe-operators" ];
+    extra-experimental-features = [ "pipe-operator" "ca-derivations" ];
     extra-substituters = [ "https://cache.kyouma.net" ];
     extra-trusted-public-keys = [ "cache.kyouma.net:Frjwu4q1rnwE/MnSTmX9yx86GNA/z3p/oElGvucLiZg=" ];
   };
@@ -23,6 +23,10 @@
       pkgs = nixpkgs.legacyPackages.${system};
 
       mimalloc = (pkgs.mimalloc.overrideAttrs (prevAttrs: {
+        __contentAddressed = true;
+        outputHashMode = "recursive";
+        outputHashAlgo = "sha256";
+
         postPatch = prevAttrs.postPatch or "" + ''
         sed -E -i \
           -e 's/(\{ )1(, UNINIT, MI_OPTION_LEGACY\(purge_decommits,reset_decommits\) \})/\10\2/' \
@@ -50,6 +54,10 @@
       }).overrideAttrs extraWrapper;
 
       floorp-unwrapped = (pkgs.floorp-unwrapped.overrideAttrs (prevAttrs: {
+        __contentAddressed = true;
+        outputHashMode = "recursive";
+        outputHashAlgo = "sha256";
+
         configureFlags = prevAttrs.configureFlags or [ ]
           ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
@@ -78,6 +86,10 @@
       }).overrideAttrs extraWrapper;
 
       thunderbird-unwrapped = (pkgs.thunderbird-latest-unwrapped.overrideAttrs (prevAttrs: {
+        __contentAddressed = true;
+        outputHashMode = "recursive";
+        outputHashAlgo = "sha256";
+
         configureFlags = prevAttrs.configureFlags or [ ]
           ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
