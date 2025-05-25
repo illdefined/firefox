@@ -145,4 +145,9 @@ in assert (lib.xor firefox thunderbird); {
   ShowHomeButton = false;
   SSLVersionMin = "tls1.3";
   TranslateEnabled = true;
+
+  UserMessaging = {
+    SkipOnboarding = true;
+    MoreFromMozilla = false;
+  };
 }

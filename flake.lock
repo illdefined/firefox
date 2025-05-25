@@ -1,23 +1,36 @@
 {
   "nodes": {
-    "nixpkgs": {
+    "flocon": {
       "locked": {
-        "lastModified": 1747958103,
-        "narHash": "sha256-qmmFCrfBwSHoWw7cVK4Aj+fns+c54EBP8cGqp/yK410=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "fe51d34885f7b5e3e7b59572796e1bcb427eccb1",
-        "type": "github"
+        "lastModified": 1748101168,
+        "narHash": "sha256-Zs/x/3C62+EvyH/1YhVUQwQ7pudR94u9SIiJuelSn7w=",
+        "ref": "refs/heads/main",
+        "rev": "358ee6515c1bf4e752c4ed396bce60a64e93b3ef",
+        "revCount": 1,
+        "type": "git",
+        "url": "https://woof.rip/mikael/flocon.git"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
+        "type": "git",
+        "url": "https://woof.rip/mikael/flocon.git"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 315532800,
+        "narHash": "sha256-YVFaiDALRSE0J2yYCosZ2YOEN0j+JpWEDZIQ5lRJvU0=",
+        "rev": "fe51d34885f7b5e3e7b59572796e1bcb427eccb1",
+        "type": "tarball",
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre804599.fe51d34885f7/nixexprs.tar.xz?rev=fe51d34885f7b5e3e7b59572796e1bcb427eccb1"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://channels.nixos.org/nixpkgs-unstable/nixexprs.tar.xz"
       }
     },
     "root": {
       "inputs": {
+        "flocon": "flocon",
         "nixpkgs": "nixpkgs"
       }
     }
