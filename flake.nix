@@ -84,7 +84,7 @@
         meta = prevAttrs.meta // meta;
       })).override {
         #alsaSupport = false;
-        ffmpegSupport = false;
+        #ffmpegSupport = false;
         jackSupport = false;
         jemallocSupport = false;
         ltoSupport = true;
