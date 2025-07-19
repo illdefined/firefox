@@ -3,10 +3,10 @@
     "nixpkgs": {
       "locked": {
         "lastModified": 315532800,
-        "narHash": "sha256-X5WIcIkFxPhw7mS219TbEOgrugbMx/2cin09OlWobT8=",
-        "rev": "dab3a6e781554f965bde3def0aa2fda4eb8f1708",
+        "narHash": "sha256-6lH+e1WGAX7sA9ey7nEcksrMVv0ZGd5TxapjfrAIbts=",
+        "rev": "8131c0ea9df6293a247be743a387ff725e464db7",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre830668.dab3a6e78155/nixexprs.tar.xz?rev=dab3a6e781554f965bde3def0aa2fda4eb8f1708"
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre831683.8131c0ea9df6/nixexprs.tar.xz?rev=8131c0ea9df6293a247be743a387ff725e464db7"
       },
       "original": {
         "type": "tarball",
