@@ -43,6 +43,10 @@
     in {
       default = self.packages.${system}.floorp;
       floorp = (pkgs.wrapFirefox self.packages.${system}.floorp-unwrapped {
+        cfg = {
+          smartcardSupport = true;
+        } // pkgs.config.floorp or pkgs.config.firefox or { };
+
         extraPoliciesFiles =
           import ./policy.nix { inherit lib; firefox = true; }
           |> pkgs.writers.writeJSON "policy.json"
@@ -71,6 +75,10 @@
       };
 
       thunderbird = (pkgs.wrapThunderbird self.packages.${system}.thunderbird-unwrapped {
+        cfg = {
+          smartcardSupport = true;
+        } // pkgs.config.thunderbird or { };
+
         extraPoliciesFiles =
           import ./policy.nix { inherit lib; thunderbird = true; }
           |> pkgs.writers.writeJSON "policy.json"
