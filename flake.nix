@@ -33,7 +33,8 @@
         secureBuild = true;
       };
 
-      extraWrapper = prevAttrs: {
+      overrideAttrs = prevAttrs: {
+        hardeningEnable = prevAttrs.hardeningEnable or [ ] ++ [ "pie" ];
         buildCommand = prevAttrs.buildCommand + ''
           sed -i \
             -e '$i export LD_PRELOAD="${lib.getLib mimalloc}/lib/libmimalloc-secure.so"' \
@@ -51,7 +52,7 @@
           import ./policy.nix { inherit lib; firefox = true; }
           |> pkgs.writers.writeJSON "policy.json"
           |> lib.singleton;
-      }).overrideAttrs extraWrapper;
+      }).overrideAttrs overrideAttrs;
 
       floorp-unwrapped = (pkgs.floorp-unwrapped.overrideAttrs (prevAttrs: {
         configureFlags = prevAttrs.configureFlags or [ ]
@@ -83,7 +84,7 @@
           import ./policy.nix { inherit lib; thunderbird = true; }
           |> pkgs.writers.writeJSON "policy.json"
           |> lib.singleton;
-      }).overrideAttrs extraWrapper;
+      }).overrideAttrs overrideAttrs;
 
       thunderbird-unwrapped = (pkgs.thunderbird-latest-unwrapped.overrideAttrs (prevAttrs: {
         configureFlags = prevAttrs.configureFlags or [ ]
