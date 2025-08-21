@@ -78,6 +78,16 @@
         secureBuild = true;
       };
 
+      opensc = prev.opensc.overrideAttrs (prevAttrs: {
+        version = "0.26.1-unstable-2025-08-13";
+
+        src = final.fetchFromGitHub {
+          inherit (prevAttrs.src) owner repo;
+          rev = "bd73fc397269a294ca2ae54b2deb1bc56ae802f8";
+          hash = "sha256-Try05xTnoj1h5UAfHIr72wZd+75HTuNOSC1OjZtEvB0=";
+        };
+      });
+
       thunderbird = (final.wrapThunderbird final.thunderbird-unwrapped {
         cfg = {
           smartcardSupport = true;
