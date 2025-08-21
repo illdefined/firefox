@@ -13,48 +13,42 @@
 
   outputs = { self, nixpkgs, ... }: let
     inherit (nixpkgs) lib;
+    eachSystem = fn: lib.genAttrs [
+      "aarch64-linux"
+      "riscv64-linux"
+      "x86_64-linux"
+    ] (system: fn system (import nixpkgs {
+      inherit system;
+      overlays = [ self.overlays.default ];
+    }));
 
     meta = {
       timeout = 24 * 3600;
       maxSilent = 8 * 3600;
     };
   in {
-    packages = lib.genAttrs [ "riscv64-linux" "aarch64-linux" "x86_64-linux" ] (system: let
-      pkgs = nixpkgs.legacyPackages.${system};
-
-      mimalloc = (pkgs.mimalloc.overrideAttrs (prevAttrs: {
-        postPatch = prevAttrs.postPatch or "" + ''
-        sed -E -i \
-          -e 's/(\{ )1(, UNINIT, MI_OPTION_LEGACY\(purge_decommits,reset_decommits\) \})/\10\2/' \
-          -e 's/(\{ )10(,  UNINIT, MI_OPTION_LEGACY\(purge_delay,reset_delay\) \})/\150\2/' \
-          src/options.c
-        '';
-      })).override {
-        secureBuild = true;
-      };
-
+    overlays.default = final: prev: let
       overrideAttrs = prevAttrs: {
         hardeningEnable = prevAttrs.hardeningEnable or [ ] ++ [ "pie" ];
         buildCommand = prevAttrs.buildCommand + ''
           sed -i \
-            -e '$i export LD_PRELOAD="${lib.getLib mimalloc}/lib/libmimalloc-secure.so"' \
+            -e '$i export LD_PRELOAD="${lib.getLib final.mimalloc}/lib/libmimalloc-secure.so"' \
             "$out/bin/${prevAttrs.meta.mainProgram}"
         '';
       };
     in {
-      default = self.packages.${system}.floorp;
-      floorp = (pkgs.wrapFirefox self.packages.${system}.floorp-unwrapped {
+      floorp = (final.wrapFirefox final.floorp-unwrapped {
         cfg = {
           smartcardSupport = true;
-        } // pkgs.config.floorp or pkgs.config.firefox or { };
+        } // final.config.floorp or final.config.firefox or { };
 
         extraPoliciesFiles =
           import ./policy.nix { inherit lib; firefox = true; }
-          |> pkgs.writers.writeJSON "policy.json"
+          |> final.writers.writeJSON "policy.json"
           |> lib.singleton;
       }).overrideAttrs overrideAttrs;
 
-      floorp-unwrapped = (pkgs.floorp-unwrapped.overrideAttrs (prevAttrs: {
+      floorp-unwrapped = (prev.floorp-unwrapped.overrideAttrs (prevAttrs: {
         configureFlags = prevAttrs.configureFlags or [ ]
           ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
@@ -71,22 +65,31 @@
         pulseaudioSupport = true;
         sndioSupport = false;
         waylandSupport = true;
-
-        inherit (self.packages.${system}) xvfb-run;
       };
 
-      thunderbird = (pkgs.wrapThunderbird self.packages.${system}.thunderbird-unwrapped {
+      mimalloc = (prev.mimalloc.overrideAttrs (prevAttrs: {
+        postPatch = prevAttrs.postPatch or "" + ''
+        sed -E -i \
+          -e 's/(\{ )1(, UNINIT, MI_OPTION_LEGACY\(purge_decommits,reset_decommits\) \})/\10\2/' \
+          -e 's/(\{ )10(,  UNINIT, MI_OPTION_LEGACY\(purge_delay,reset_delay\) \})/\150\2/' \
+          src/options.c
+        '';
+      })).override {
+        secureBuild = true;
+      };
+
+      thunderbird = (final.wrapThunderbird final.thunderbird-unwrapped {
         cfg = {
           smartcardSupport = true;
-        } // pkgs.config.thunderbird or { };
+        } // final.config.thunderbird or { };
 
         extraPoliciesFiles =
           import ./policy.nix { inherit lib; thunderbird = true; }
-          |> pkgs.writers.writeJSON "policy.json"
+          |> final.writers.writeJSON "policy.json"
           |> lib.singleton;
       }).overrideAttrs overrideAttrs;
 
-      thunderbird-unwrapped = (pkgs.thunderbird-latest-unwrapped.overrideAttrs (prevAttrs: {
+      thunderbird-unwrapped = (prev.thunderbird-latest-unwrapped.overrideAttrs (prevAttrs: {
         configureFlags = prevAttrs.configureFlags or [ ]
           ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
@@ -105,11 +108,9 @@
 
         privacySupport = true;
         #drmSupport = false;
-
-        inherit (self.packages.${system}) xvfb-run;
       };
 
-      xvfb-run = pkgs.writeShellApplication {
+      xvfb-run = final.writeShellApplication {
         name = "xvfb-run";
         text = ''
           # Discard all options
@@ -124,16 +125,26 @@
           WLR_LIBINPUT_NO_DEVICES=1 \
           WLR_RENDERER=pixman \
           XDG_RUNTIME_DIR="$(mktemp -d)" \
-            exec '${lib.getExe pkgs.cage}' -- "$@"
+            exec '${lib.getExe final.cage}' -- "$@"
         '';
 
         # shellcheck is not yet available on RISC-V
-        checkPhase = if pkgs.stdenv.buildPlatform.isRiscV then ''
+        checkPhase = if final.stdenv.buildPlatform.isRiscV then ''
           runHook preCheck
-          ${pkgs.stdenv.shellDryRun} "$target"
+          ${final.stdenv.shellDryRun} "$target"
           runHook postCheck
         '' else null;
       };
+    };
+
+    packages = eachSystem (system: pkgs: {
+      default = self.packages.${system}.floorp;
+
+      inherit (pkgs)
+        floorp
+        floorp-unwrapped
+        thunderbird
+        thunderbird-unwrapped;
     });
 
     hydraJobs = self.packages |> lib.foldlAttrs (jobs: system: packages: lib.recursiveUpdate jobs
