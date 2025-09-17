@@ -37,10 +37,10 @@
         '';
       };
     in {
-      floorp = (final.wrapFirefox final.floorp-unwrapped {
+      firefox = (final.wrapFirefox final.firefox-unwrapped {
         cfg = {
           smartcardSupport = true;
-        } // final.config.floorp or final.config.firefox or { };
+        } // final.config.firefox or { };
 
         extraPoliciesFiles =
           import ./policy.nix { inherit lib; firefox = true; }
@@ -48,7 +48,7 @@
           |> lib.singleton;
       }).overrideAttrs overrideAttrs;
 
-      floorp-unwrapped = (prev.floorp-unwrapped.overrideAttrs (prevAttrs: {
+      firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs (prevAttrs: {
         configureFlags = prevAttrs.configureFlags or [ ]
           ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
 
@@ -148,11 +148,11 @@
     };
 
     packages = eachSystem (system: pkgs: {
-      default = self.packages.${system}.floorp;
+      default = self.packages.${system}.firefox;
 
       inherit (pkgs)
-        floorp
-        floorp-unwrapped
+        firefox
+        firefox-unwrapped
         thunderbird
         thunderbird-unwrapped;
     });
