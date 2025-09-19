@@ -42,10 +42,7 @@
           smartcardSupport = true;
         } // final.config.firefox or { };
 
-        extraPoliciesFiles =
-          import ./policy.nix { inherit lib; firefox = true; }
-          |> final.writers.writeJSON "policy.json"
-          |> lib.singleton;
+        extraPolicies = import ./policy.nix { inherit lib; firefox = true; };
       }).overrideAttrs overrideAttrs;
 
       firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs (prevAttrs: {
