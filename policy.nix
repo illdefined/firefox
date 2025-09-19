@@ -48,6 +48,11 @@ in assert (lib.xor firefox thunderbird); {
       installation_mode = "normal_installed";
       install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
     };
+
+    "FirefoxColor@mozilla.com" = {
+      installation_mode = "normal_installed";
+      install_url = "https://addons.mozilla.org/firefox/downloads/latest/firefox-color/latest.xpi";
+    };
   };
 
   FirefoxHome = {
