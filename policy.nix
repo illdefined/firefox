@@ -5,24 +5,27 @@ in assert (lib.xor firefox thunderbird); {
 
   Cookies = {
     Behavior = "reject-tracker-and-partition-foreign";
-    BehivorPrivateBrowsing = "reject-tracker-and-partition-foreign";
+    BehaviorPrivateBrowsing = "reject-tracker-and-partition-foreign";
   };
 
   DNSOverHTTPS.Enabled = false;
   DisableEncryptedClientHello = false;
   DisableFeedbackCommands = true;
+  DisableFirefoxAccounts = true;
   DisableFirefoxStudies = true;
   DisablePocket = true;
+  DisableSetDesktopBackground = true;
   DisableTelemetry = true;
   DontCheckDefaultBrowser = true;
-  
+
   EnableTrackingProtection = {
     Value = true;
     Cryptomining = true;
     Fingerprinting = true;
     EmailTracking = true;
+    SuspectedFingerprinting = true;
   };
-  
+
   EncryptedMediaExtensions.Enabled = true;
 
   ExtensionSettings = {
@@ -48,6 +51,7 @@ in assert (lib.xor firefox thunderbird); {
   };
 
   FirefoxHome = {
+    Pocket = false;
     SponsoredTopSites = false;
     SponsoredPocket = false;
   };
@@ -58,10 +62,12 @@ in assert (lib.xor firefox thunderbird); {
   };
 
   HardwareAcceleration = true;
-  HomePage.StartPage = "previous-session";
+  Homepage.StartPage = "previous-session";
   HttpsOnlyMode = "force_enabled";
   NewTabPage = false;
+  OfferToSaveLogins = false;
   OverrideFirstRunPage = "";
+  PasswordManagerEnabled = false;
 
   PDFjs = {
     Enabled = true;
@@ -83,10 +89,13 @@ in assert (lib.xor firefox thunderbird); {
       Value = value;
     };
   in {
+    # use OS locale
+    "intl.regional_prefs_us_os_locales" = true;
+
     # date and time formats
     "intl.date_time.pattern_override.date_short" = default "yyyy-MM-dd";
     "intl.date_time.pattern_override.time_short" = default "HH:mm";
-  
+
     # cache
     "browser.cache.memory.enable" = default true;
     "browser.cache.memory.capacity" = default 262144;
@@ -106,7 +115,7 @@ in assert (lib.xor firefox thunderbird); {
     "browser.safebrowsing.downloads.remote.url" = default "";
 
     # disable accessibility
-    "accessibility.force_disabled" = default true;
+    "accessibility.force_disabled" = default 1;
 
     # disable crash reporting
     "browser.tabs.crashReporting.sendReport" = locked false;
@@ -125,11 +134,17 @@ in assert (lib.xor firefox thunderbird); {
     "privacy.query_stripping.enabled" = default true;
     "privacy.query_stripping.enabled.pbmode" = default true;
 
+    # disable CSP reporting
+    "security.csp.reporting.enabled" = default false;
+
+    # disable TLS error reporting to Mozilla
+    "security.ssl.errorReporting.enabled" = default false;
+
     # TLS
+    "security.insecure_connection_text.enabled" = default true;
+    "security.insecure_connection_text.pbmode.enabled" = default true;
     "security.ssl.require_safe_negotiation" = default true;
     "security.tls.hello_downgrade_check" = default true;
-    "security.OCSP.enabled" = default 1;
-    "security.OCSP.require" = default true;
     "security.cert_pinning.enforcement_level" = default 2;
     "security.pki.crlite_mode" = default 2;
 
@@ -138,11 +153,28 @@ in assert (lib.xor firefox thunderbird); {
   } // optionalAttrs firefox {
     # hardware acceleration
     "gfx.webrender.all" = default true;
+    "gfx.webrender.compositor" = default true;
+    "gfx.webrender.compositor.force-enabled" = default true;
+    "layers.acceleration.force-enabled" = default true;
+    "layers.gpu-process.enabled" = default true;
+    "layers.gpu-process.force-enabled" = default true;
     "media.ffmpeg.vaapi.enabled" = default true;
+    "media.gpu-process-decoder" = default true;
+
+    # private container for new tab page thumbnails
+    "privacy.usercontext.about_newtab_segregation.enabled" = default true;
   };
-  
+
   PromptForDownloadLocation = true;
+  RequestedLocales = [ "en-GB" ];
   ShowHomeButton = false;
   SSLVersionMin = "tls1.3";
   TranslateEnabled = true;
+
+  UserMessaging = {
+    ExtensionRecommendations = false;
+    FeatureRecommendations = false;
+    SkipOnboarding = false;
+    MoreFromMozilla = false;
+  };
 }
