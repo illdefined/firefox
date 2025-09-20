@@ -66,6 +66,12 @@ in assert (lib.xor firefox thunderbird); {
     ImproveSuggest = false;
   };
 
+  GenerativeAI = {
+    Chatbot = false;
+    LinkPreviews = false;
+    TabGroups = false;
+  };
+
   HardwareAcceleration = true;
   Homepage.StartPage = "previous-session";
   HttpsOnlyMode = "force_enabled";
