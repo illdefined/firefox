@@ -21,20 +21,34 @@
       inherit system;
       overlays = [ self.overlays.default ];
     }));
-
-    meta = {
-      timeout = 24 * 3600;
-      maxSilent = 8 * 3600;
-    };
   in {
     overlays.default = final: prev: let
-      overrideAttrs = prevAttrs: {
-        hardeningEnable = prevAttrs.hardeningEnable or [ ] ++ [ "pie" ];
+      wrapper = prevAttrs: {
         buildCommand = prevAttrs.buildCommand + ''
           sed -i \
             -e '$i export LD_PRELOAD="${lib.getLib final.mimalloc}/lib/libmimalloc-secure.so"' \
             "$out/bin/${prevAttrs.meta.mainProgram}"
         '';
+      };
+
+      unwrapped = prevAttrs: {
+        hardeningEnable = prevAttrs.hardeningEnable or [ ] ++ [ "pie" ];
+
+        configureFlags = prevAttrs.configureFlags or [ ] ++ [
+          "--enable-default-toolkit=cairo-gtk3-wayland-only"
+          "--disable-accessibility"
+        ];
+
+        postPatch = prevAttrs.postPatch or "" + ''
+          find . -type f -name moz.configure -print0 \
+            | xargs -0 -r sed -E -i \
+              's/^([a-z_]+\("MOZ_(DATA_REPORTING|SERVICES_(HEALTHREPORT|SYNC)|NORMANDY|TELEMETRY_REPORTING)",[[:space:]]*)True\>/\1False/'
+        '';
+
+        meta = prevAttrs.meta or { } // {
+          timeout = 24 * 3600;
+          maxSilent = 8 * 3600;
+        };
       };
     in {
       firefox = (final.wrapFirefox final.firefox-unwrapped {
@@ -43,14 +57,9 @@
         } // final.config.firefox or { };
 
         extraPolicies = import ./policy.nix { inherit lib; firefox = true; };
-      }).overrideAttrs overrideAttrs;
+      }).overrideAttrs wrapper;
 
-      firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs (prevAttrs: {
-        configureFlags = prevAttrs.configureFlags or [ ]
-          ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
-
-        meta = prevAttrs.meta // meta;
-      })).override {
+      firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs unwrapped).override {
         #alsaSupport = false;
         ffmpegSupport = true;
         gssSupport = false;
@@ -94,14 +103,9 @@
           import ./policy.nix { inherit lib; thunderbird = true; }
           |> final.writers.writeJSON "policy.json"
           |> lib.singleton;
-      }).overrideAttrs overrideAttrs;
+      }).overrideAttrs wrapper;
 
-      thunderbird-unwrapped = (prev.thunderbird-latest-unwrapped.overrideAttrs (prevAttrs: {
-        configureFlags = prevAttrs.configureFlags or [ ]
-          ++ [ "--enable-default-toolkit=cairo-gtk3-wayland-only" ];
-
-        meta = prevAttrs.meta // meta;
-      })).override {
+      thunderbird-unwrapped = (prev.thunderbird-latest-unwrapped.overrideAttrs unwrapped).override {
         #alsaSupport = false;
         #ffmpegSupport = false;
         jackSupport = false;
