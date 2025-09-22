@@ -179,7 +179,7 @@ in assert (lib.xor firefox thunderbird); {
   PromptForDownloadLocation = true;
   RequestedLocales = [ "en-GB" ];
   ShowHomeButton = false;
-  SSLVersionMin = "tls1.3";
+  SSLVersionMin = "tls1.2";
   TranslateEnabled = true;
 
   UserMessaging = {
