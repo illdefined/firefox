@@ -17,6 +17,7 @@
       "aarch64-linux"
       "riscv64-linux"
       "x86_64-linux"
+      "aarch64-darwin"
     ] (system: fn system (import nixpkgs {
       inherit system;
       overlays = [ self.overlays.default ];
@@ -35,8 +36,9 @@
         hardeningEnable = prevAttrs.hardeningEnable or [ ] ++ [ "pie" ];
 
         configureFlags = prevAttrs.configureFlags or [ ] ++ [
-          "--enable-default-toolkit=cairo-gtk3-wayland-only"
           "--disable-accessibility"
+        ] ++ lib.optionals final.stdenv.hostPlatform.isLinux [
+          "--enable-default-toolkit=cairo-gtk3-wayland-only"
         ];
 
         postPatch = prevAttrs.postPatch or "" + ''
@@ -60,17 +62,10 @@
       }).overrideAttrs wrapper;
 
       firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs unwrapped).override {
-        #alsaSupport = false;
-        ffmpegSupport = true;
         gssSupport = false;
         jackSupport = false;
         jemallocSupport = false;
-        ltoSupport = true;
-        pgoSupport = true;
-        pipewireSupport = true;
-        pulseaudioSupport = true;
         sndioSupport = false;
-        waylandSupport = true;
       };
 
       mimalloc = (prev.mimalloc.overrideAttrs (prevAttrs: {
@@ -106,21 +101,15 @@
       }).overrideAttrs wrapper;
 
       thunderbird-unwrapped = (prev.thunderbird-latest-unwrapped.overrideAttrs unwrapped).override {
-        #alsaSupport = false;
-        #ffmpegSupport = false;
         jackSupport = false;
         jemallocSupport = false;
-        ltoSupport = true;
-        pgoSupport = false;
-        pipewireSupport = false;
-        pulseaudioSupport = true;
         sndioSupport = false;
-        waylandSupport = true;
 
         privacySupport = true;
         #drmSupport = false;
       };
 
+    } // lib.optionalAttrs prev.stdenv.hostPlatform.isLinux {
       xvfb-run = final.writeShellApplication {
         name = "xvfb-run";
         text = ''
