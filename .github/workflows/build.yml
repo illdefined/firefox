@@ -1,0 +1,47 @@
+name: Package build
+
+on:
+  - push
+  - workflow_dispatch
+
+jobs:
+  build-native:
+    strategy:
+      matrix:
+        runner:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-latest
+
+        package:
+          - firefox
+          - thunderbird
+
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: illdefined/ssh@main
+        with:
+          private-keys: ${{ secrets.KYOUMA_CACHE_KEY }}
+          known-hosts: seras.kyouma.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPNVavo3YHVsrYwXRVISu7kDoknn+5inFGySn4azlB8P
+      - uses: illdefined/nix@main
+      - run: nix build .#${{ matrix. package }}
+      - run: nix-copy-closure --use-substitutes nix-ssh@seras.kyouma.net result
+
+  build-riscv:
+    strategy:
+      matrix:
+        package:
+          - firefox
+          - thunderbird
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: illdefined/ssh@main
+        with:
+          private-keys: ${{ secrets.KYOUMA_CACHE_KEY }}
+          known-hosts: seras.kyouma.net ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPNVavo3YHVsrYwXRVISu7kDoknn+5inFGySn4azlB8P
+      - uses: illdefined/nix@main
+      - run: nix build .#packages.riscv64-linux.${{ matrix.package }}
+      - run: nix-copy-closure --use-substitutes nix-ssh@seras.kyouma.net result
