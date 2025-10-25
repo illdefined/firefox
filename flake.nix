@@ -52,6 +52,34 @@
           maxSilent = 8 * 3600;
         };
       };
+
+      xvfb-run = if prev.stdenv.hostPlatform.isLinux
+        then final.writeShellApplication {
+          name = "xvfb-run";
+          text = ''
+            # Discard all options
+            while [[ "$1" =~ ^- ]]; do
+              case "$1" in
+                (-e|-f|-n|-p|-s|-w) shift ;&
+                (*) shift ;;
+              esac
+            done
+
+            WLR_BACKENDS=headless \
+            WLR_LIBINPUT_NO_DEVICES=1 \
+            WLR_RENDERER=pixman \
+            XDG_RUNTIME_DIR="$(mktemp -d)" \
+              exec '${lib.getExe final.cage}' -- "$@"
+          '';
+
+          # shellcheck is not yet available on RISC-V
+          checkPhase = if final.stdenv.buildPlatform.isRiscV then ''
+            runHook preCheck
+            ${final.stdenv.shellDryRun} "$target"
+            runHook postCheck
+          '' else null;
+        }
+        else prev.xvfb-run;
     in {
       firefox = (final.wrapFirefox final.firefox-unwrapped {
         cfg = {
@@ -66,6 +94,8 @@
         jackSupport = false;
         jemallocSupport = false;
         sndioSupport = false;
+
+        inherit xvfb-run;
       };
 
       mimalloc = (prev.mimalloc.overrideAttrs (prevAttrs: {
@@ -107,33 +137,8 @@
 
         privacySupport = true;
         #drmSupport = false;
-      };
 
-    } // lib.optionalAttrs prev.stdenv.hostPlatform.isLinux {
-      xvfb-run = final.writeShellApplication {
-        name = "xvfb-run";
-        text = ''
-          # Discard all options
-          while [[ "$1" =~ ^- ]]; do
-            case "$1" in
-              (-e|-f|-n|-p|-s|-w) shift ;&
-              (*) shift ;;
-            esac
-          done
-
-          WLR_BACKENDS=headless \
-          WLR_LIBINPUT_NO_DEVICES=1 \
-          WLR_RENDERER=pixman \
-          XDG_RUNTIME_DIR="$(mktemp -d)" \
-            exec '${lib.getExe final.cage}' -- "$@"
-        '';
-
-        # shellcheck is not yet available on RISC-V
-        checkPhase = if final.stdenv.buildPlatform.isRiscV then ''
-          runHook preCheck
-          ${final.stdenv.shellDryRun} "$target"
-          runHook postCheck
-        '' else null;
+        inherit xvfb-run;
       };
     } // lib.optionalAttrs prev.stdenv.hostPlatform.isDarwin {
       # Temporary workaround for build failure on Darwin
