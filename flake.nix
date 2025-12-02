@@ -44,7 +44,7 @@
         postPatch = prevAttrs.postPatch or "" + ''
           find . -type f -name moz.configure -print0 \
             | xargs -0 -r sed -E -i \
-              's/^([a-z_]+\("MOZ_(DATA_REPORTING|SERVICES_(HEALTHREPORT|SYNC)|NORMANDY|TELEMETRY_REPORTING)",[[:space:]]*)True\>/\1False/'
+              's/^([a-z_]+\("MOZ_(DATA_REPORTING|SERVICES_HEALTHREPORT|NORMANDY|TELEMETRY_REPORTING)",[[:space:]]*)True\>/\1False/'
         '';
 
         meta = prevAttrs.meta or { } // {
