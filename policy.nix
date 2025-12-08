@@ -133,6 +133,9 @@ in assert (lib.xor firefox thunderbird); {
     # disable pings
     "browser.send_pings" = locked false;
 
+    # prevent access to Tor hidden services
+    "network.dns.blockDotOnion" = locked true;
+
     # strip cross‐origin referrers
     "network.http.referrer.XOriginTrimmingPolicy" = default 2;
 
