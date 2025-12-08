@@ -140,9 +140,6 @@
 
         inherit xvfb-run;
       };
-    } // lib.optionalAttrs prev.stdenv.hostPlatform.isDarwin {
-      # Temporary workaround for build failure on Darwin
-      libcanberra-gtk3 = prev.libcanberra-gtk2;
     };
 
     packages = eachSystem (system: pkgs: {
