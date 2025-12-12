@@ -33,8 +33,6 @@
       };
 
       unwrapped = prevAttrs: {
-        hardeningEnable = prevAttrs.hardeningEnable or [ ] ++ [ "pie" ];
-
         configureFlags = prevAttrs.configureFlags or [ ] ++ [
           "--disable-accessibility"
         ] ++ lib.optionals final.stdenv.hostPlatform.isLinux [
