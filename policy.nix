@@ -99,6 +99,7 @@ in assert (lib.xor firefox thunderbird); {
     "intl.regional_prefs_us_os_locales" = true;
 
     # date and time formats
+    "intl.date_time.pattern_override.connector_short" = default "{1}' '{0}";  # en space
     "intl.date_time.pattern_override.date_short" = default "yyyy-MM-dd";
     "intl.date_time.pattern_override.time_short" = default "HH:mm";
 
