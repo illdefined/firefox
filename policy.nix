@@ -173,6 +173,70 @@ in assert (lib.xor firefox thunderbird); {
 
     # private container for new tab page thumbnails
     "privacy.usercontext.about_newtab_segregation.enabled" = default true;
+  } // optionalAttrs thunderbird {
+    # disable audible notifications
+    "calendar.alarms.playsound" = default false;
+    "mail.biff.play_sound" = default false;
+
+    # calendar week starts on Monday
+    "calendar.week.start" = default 1;
+
+    # always display e‐mail addresses
+    "mail.addressDisplayFormat" = default 0;
+    "mail.showCondensedAddresses" = default false;
+
+    # disable chat component
+    "mail.chat_enabled" = default false;
+
+    # separate attachments from message body
+    "mail.content_disposition_type" = default 1;
+
+    # enable plain text highlighting
+    "mail.display_struct" = default true;
+
+    # force plain‐text composition
+    "mail.html_compose" = locked false;
+    "mail.identity.default.compose_html" = locked false;
+
+    # reply on bottom
+    "mail.identity.default.reply_on_top" = default false;
+
+    # QoS: AF13
+    "mail.imap.qos" = default 56;
+    "mail.smtp.qos" = default 56;
+
+    # avoid STARTTLS
+    "mail.server.default.port" = locked 993;
+    "mail.server.default.socketType" = locked 3;
+    "mail.smtpserver.default.port" = locked 465;
+    "mail.smtpserver.default.try_ssl" = locked 3;
+
+    # flowed message support
+    "mailnews.display.disable_format_flowed_support" = default false;
+    "mailnews.send_plaintext_flowed" = default true;
+    "plain_text.wrap_long_lines" = default true;
+
+    # default message display
+    "mailnews.default_sort_order" = default 1;  # ascending
+    "mailnews.default_sort_type" = default 18;  # by date
+    "mailnews.default_view_flags" = default 1;  # threaded
+
+    # sanitise HTML
+    "mailnews.display.html_as" = default 3;
+
+    # display sender’s timezone
+    "mailnews.display.date_senders_timezone" = default true;
+
+    # force reduced user agent
+    "mailnews.headers.useMinimalUserAgent" = locked true;
+
+    # search by ISO 8601 date
+    "mailnews.search_date_format" = default 1;
+    "mailnews.search_date_separator" = default "-";
+
+    # force UTF-8 encoding
+    "mailnews.send_default_charset" = locked "UTF-8";
+    "mailnews.reply_in_default_charset" = locked true;
   };
 
   PromptForDownloadLocation = true;
