@@ -84,7 +84,11 @@
           smartcardSupport = true;
         } // final.config.firefox or { };
 
-        extraPolicies = import ./policy.nix { inherit lib; firefox = true; };
+        extraPolicies = import ./policy.nix {
+          inherit lib;
+          pkgs = final;
+          firefox = true;
+        };
       }).overrideAttrs wrapper;
 
       firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs unwrapped).override {
@@ -122,10 +126,11 @@
           smartcardSupport = true;
         } // final.config.thunderbird or { };
 
-        extraPoliciesFiles =
-          import ./policy.nix { inherit lib; thunderbird = true; }
-          |> final.writers.writeJSON "policy.json"
-          |> lib.singleton;
+        extraPolicies = import ./policy.nix {
+          inherit lib;
+          pkgs = final;
+          thunderbird = true;
+        };
       }).overrideAttrs wrapper;
 
       thunderbird-unwrapped = (prev.thunderbird-latest-unwrapped.overrideAttrs unwrapped).override {

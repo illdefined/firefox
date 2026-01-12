@@ -1,4 +1,4 @@
-{ lib, firefox ? false, thunderbird ? false }: let
+{ lib, pkgs, firefox ? false, thunderbird ? false }: let
   inherit (lib) optionals optionalAttrs;
 in assert (lib.xor firefox thunderbird); {
   CaptivePortal = false;
@@ -223,6 +223,16 @@ in assert (lib.xor firefox thunderbird); {
     # force UTF-8 encoding
     "mailnews.send_default_charset" = locked "UTF-8";
     "mailnews.reply_in_default_charset" = locked true;
+
+    # DKIM
+    "extensions.dkim_verifier.dns.resolver" = default 2;
+    "extensions.dkim_verifier.dns.getNameserversFromOS" = default true;
+    "extensions.dkim_verifier.dns.libunbound.path" = default (lib.getLib pkgs.unbound + "/lib/libunbound.so");
+    "extensions.dkim_verifier.dns.libunbound.path.relToProfileDir" = default false;
+
+    "extensions.dkim_verifier.policy.signRules.enable" = default true;
+    "extensions.dkim_verifier.policy.signRules.checkDefaultRules" = default true;
+    "extensions.dkim_verifier.policy.DMARC.shouldBeSigned.enable" = default true;
   };
 
   PromptForDownloadLocation = true;
