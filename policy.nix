@@ -28,32 +28,17 @@ in assert (lib.xor firefox thunderbird); {
 
   EncryptedMediaExtensions.Enabled = true;
 
-  ExtensionSettings = {
-    "uBlock0@raymondhill.net" = {
-      installation_mode = "normal_installed";
-      install_url = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-    };
+  ExtensionSettings = lib.mapAttrs (_: install_url: {
+    installation_mode = "normal_installed";
+    inherit install_url;
+  }) ({
+    "uBlock0@raymondhill.net" = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
   } // optionalAttrs firefox {
-    "@testpilot-containers" = {
-      installation_mode = "normal_installed";
-      install_url = "https://addons.mozilla.org/firefox/downloads/latest/multi-account-containers/latest.xpi";
-    };
-
-    "gdpr@cavi.au.dk" = {
-      installation_mode = "normal_installed";
-      install_url = "https://addons.mozilla.org/firefox/downloads/latest/consent-o-matic/latest.xpi";
-    };
-
-    "jid1-BoFifL9Vbdl2zQ@jetpack" = {
-      installation_mode = "normal_installed";
-      install_url = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
-    };
-
-    "FirefoxColor@mozilla.com" = {
-      installation_mode = "normal_installed";
-      install_url = "https://addons.mozilla.org/firefox/downloads/latest/firefox-color/latest.xpi";
-    };
-  };
+    "@testpilot-containers" = "https://addons.mozilla.org/firefox/downloads/latest/multi-account-containers/latest.xpi";
+    "gdpr@cavi.au.dk" = "https://addons.mozilla.org/firefox/downloads/latest/consent-o-matic/latest.xpi";
+    "jid1-BoFifL9Vbdl2zQ@jetpack" = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
+    "FirefoxColor@mozilla.com" = "https://addons.mozilla.org/firefox/downloads/latest/firefox-color/latest.xpi";
+  });
 
   FirefoxHome = {
     Pocket = false;
