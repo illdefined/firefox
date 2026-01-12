@@ -38,6 +38,8 @@ in assert (lib.xor firefox thunderbird); {
     "gdpr@cavi.au.dk" = "https://addons.mozilla.org/firefox/downloads/latest/consent-o-matic/latest.xpi";
     "jid1-BoFifL9Vbdl2zQ@jetpack" = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
     "FirefoxColor@mozilla.com" = "https://addons.mozilla.org/firefox/downloads/latest/firefox-color/latest.xpi";
+  } // optionalAttrs thunderbird {
+    "dkim_verifier@pl" = "https://addons.thunderbird.net/thunderbird/downloads/latest/dkim-verifier/latest.xpi";
   });
 
   FirefoxHome = {
