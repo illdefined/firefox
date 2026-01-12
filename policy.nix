@@ -31,9 +31,8 @@ in assert (lib.xor firefox thunderbird); {
   ExtensionSettings = lib.mapAttrs (_: install_url: {
     installation_mode = "normal_installed";
     inherit install_url;
-  }) ({
+  }) (optionalAttrs firefox {
     "uBlock0@raymondhill.net" = "https://addons.mozilla.org/firefox/downloads/latest/ublock-origin/latest.xpi";
-  } // optionalAttrs firefox {
     "@testpilot-containers" = "https://addons.mozilla.org/firefox/downloads/latest/multi-account-containers/latest.xpi";
     "gdpr@cavi.au.dk" = "https://addons.mozilla.org/firefox/downloads/latest/consent-o-matic/latest.xpi";
     "jid1-BoFifL9Vbdl2zQ@jetpack" = "https://addons.mozilla.org/firefox/downloads/latest/decentraleyes/latest.xpi";
