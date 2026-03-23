@@ -112,12 +112,10 @@
       };
 
       opensc = prev.opensc.overrideAttrs (prevAttrs: {
-        version = "0.26.1-unstable-2026-01-09";
+        version = "0.27.0-rc2";
 
-        src = final.fetchFromGitHub {
-          inherit (prevAttrs.src) owner repo;
-          rev = "006a2192a26ebe9df73a5b259a0dcca3a4db1c4d";
-          hash = "sha256-SjDrUQe+d326Izq+5JzT2QGuw+c3RUVN2TLGmrRrNKk=";
+        src = prevAttrs.src.overrideAttrs {
+          hash = "sha256-xcfsrG38GdQt/2EbU6rnvQGq6qx/K1SoHhY3yN5AFEc=";
         };
       });
 
