@@ -111,14 +111,6 @@
         secureBuild = true;
       };
 
-      opensc = prev.opensc.overrideAttrs (prevAttrs: {
-        version = "0.27.0-rc2";
-
-        src = prevAttrs.src.overrideAttrs {
-          hash = "sha256-xcfsrG38GdQt/2EbU6rnvQGq6qx/K1SoHhY3yN5AFEc=";
-        };
-      });
-
       thunderbird = (final.wrapThunderbird final.thunderbird-unwrapped {
         cfg = {
           smartcardSupport = true;
