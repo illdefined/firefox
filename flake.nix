@@ -27,7 +27,7 @@
       wrapper = prevAttrs: {
         buildCommand = prevAttrs.buildCommand + ''
           sed -i \
-            -e '$i export LD_PRELOAD="${lib.getLib final.mimalloc}/lib/libmimalloc-secure.so"' \
+            -e '$i test -e /etc/ld-nix.so.preload || export LD_PRELOAD="${lib.getLib final.mimalloc}/lib/libmimalloc-secure.so"' \
             "$out/bin/${prevAttrs.meta.mainProgram}"
         '';
       };
