@@ -81,7 +81,7 @@
     in {
       firefox = (final.wrapFirefox final.firefox-unwrapped {
         cfg = {
-          smartcardSupport = true;
+          withPCSC = true;
         } // final.config.firefox or { };
 
         extraPolicies = import ./policy.nix {
@@ -92,10 +92,13 @@
       }).overrideAttrs wrapper;
 
       firefox-unwrapped = (prev.firefox-unwrapped.overrideAttrs unwrapped).override {
-        gssSupport = false;
-        jackSupport = false;
-        jemallocSupport = false;
-        sndioSupport = false;
+        withGSSAPI = false;
+        withJACK = false;
+        withJemalloc = false;
+        withSndio = false;
+
+        # privacy knobs
+        enableDataReporting = false;
 
         inherit xvfb-run;
       };
@@ -113,7 +116,7 @@
 
       thunderbird = (final.wrapThunderbird final.thunderbird-unwrapped {
         cfg = {
-          smartcardSupport = true;
+          withPCSC = true;
         } // final.config.thunderbird or { };
 
         extraPolicies = import ./policy.nix {
@@ -124,12 +127,15 @@
       }).overrideAttrs wrapper;
 
       thunderbird-unwrapped = (prev.thunderbird-latest-unwrapped.overrideAttrs unwrapped).override {
-        jackSupport = false;
-        jemallocSupport = false;
-        sndioSupport = false;
+        withJACK = false;
+        withJemalloc = false;
+        withSndio = false;
 
-        privacySupport = true;
-        #drmSupport = false;
+        # privacy knobs
+        enableDataReporting = false;
+        enableLocation = false;
+        enableWebRTC = false;
+        enableEMENagbar = false;
 
         inherit xvfb-run;
       };
